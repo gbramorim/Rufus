@@ -1,49 +1,45 @@
-#include <Stepper.h> // Biblioteca do motor de paço
+#include <Stepper.h>
 
-#define botao_alimentacao 7
-//botao para iniciar a contagem
-#define botao_parada 6
-//botao para parada de emergencia
-#define tempo_ativo 20
-//alterar essa constante para definir o tempo ativo(em segundos)
+#define powerButton 7 // Button to START counting.
+#define stopButton 6  // Emergency STOP button.
+#define activeTime 20 // Change this constant to set the ACTIVE time (in SECONDS).
 
-const int voltas_do_motor = 200; //definido pelo fabricante do motor
-bool click_comporta; // variavel para ativação do botao de alimentao
-bool click_emergencia;
-unsigned long currentMillis;
+const int EngineTurns = 200; // Defined by the Engine Manufacturer.
+bool clickFloodgate;         // Variable for activating the Power Button.
+bool clickEmergency;
+unsigned long currentMilliseconds;
 
-
-Stepper motor_de_passo(voltas_do_motor, 8,10,9,11); //definindo objeto do motor
+Stepper stepperMotor(EngineTurns, 8, 10, 9, 11); // Defining Engine Object.
 
 void setup()
 {
+    stepperMotor.setSpeed(60); // Speed in RPM.
 
-    motor_de_passo.setSpeed(60); //velocidade em rpm
-
-    pinMode(botao_alimentacao, INPUT); //inputs de botao
-    pinMode(botao_parada, INPUT);
-
+    pinMode(powerButton, INPUT);
+    pinMode(stopButton, INPUT);
 }
+
 void loop()
 {
-    click_comporta = digitalRead(botao_alimentacao); //liga a comporta
-    if(click_comporta == HIGH) {
-        abre_comporta(tempo_ativo*1000);
+    clickFloodgate = digitalRead(powerButton);
+    if (clickFloodgate == HIGH)
+    {
+        openFloodgate(activeTime * 1000);
     }
-
-
 }
 
-//=========================FUNÇÃO DO MOTOR======================
-/* Faz com que o motor ative por uma unidade de volta assim liberando a passagem da comida, logo depois retorna a forma incial
-entretanto se houver alguma emergencia um botao pode ser pressionado para parar a comporta*/
-void abre_comporta(unsigned long int time) {
-    currentMillis = millis();
-    while(millis() - currentMillis <= time) {
-        motor_de_passo.step(voltas_do_motor);
-        if((click_emergencia = digitalRead(botao_parada)==HIGH)
-                motor_de_passo.step(-voltas_do_motor);
+/* Causes the motor to activate for a turn unit thus releasing the passage of food, soon after it returns to the initial shape
+however if there is an emergency a button can be pressed to stop the gate */
+void openFloodgate(unsigned long int time)
+{
+    currentMilliseconds = millis();
+    while (millis() - currentMilliseconds <= time)
+    {
+        stepperMotor.step(EngineTurns);
+        if ((clickEmergency = digitalRead(stopButton) == HIGH) 
+        {
+            stepperMotor.step(-EngineTurns);
+        }
     }
-motor_de_passo.step(-voltas_do_motor);
-
+    stepperMotor.step(-EngineTurns);
 }
